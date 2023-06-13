@@ -1,5 +1,11 @@
 #include <Arduino.h>
 
+//CS Pin
+#define CS_PIN 10
+
+//LED Pin
+#define LED_PIN 13
+
 //Arbitration IDs
 #define ID_0 0x000
 #define ID_1 0x009
@@ -49,8 +55,28 @@ struct _MessageData
 };
 typedef struct _MessageData MessageData;
 
+struct _Packets
+{
+    //8 byte packets for corresponding CAN messages
+    byte p1[8];
+    byte p2[8];
+    byte p3[8];
+    byte p4[8];
+    byte p5[8];
+};
+typedef struct _Packets Packets;
+
 // Cycles through values for the messages
 void cycleValues(MessageData *data_p);
 
-// Construct messages and send over CAN
-void sendMessages(MessageData *data_p);
+// Send messages over CAN
+void sendMessages(Packets *pkts_p);
+
+// Construct messages
+void constructPackets(MessageData *data, Packets *pkts_p);
+
+// Change endianess of a 16 bit value
+uint16_t endian16(uint16_t value);
+
+// Change endianess of a 32 bit value
+uint32_t endian32(uint32_t value);
