@@ -3,9 +3,6 @@
 //CS Pin
 #define CS_PIN 10
 
-//LED Pin
-#define LED_PIN 13
-
 //Arbitration IDs
 #define ID_0 0x000
 #define ID_1 0x009
@@ -24,8 +21,8 @@
 #define MP_TEMP 10
 #define MP_VOLTAGE 10
 
-#define CYCLE_TIME 200 //ms
-#define VALUE_TIME 1 //ms
+#define CYCLE_TIME 500 //ms
+#define VALUE_TIME 20 //ms
 
 struct _MessageData
 {
@@ -76,7 +73,7 @@ void sendMessages(Packets *pkts_p);
 void constructPackets(MessageData *data, Packets *pkts_p);
 
 // Change endianess of a 16 bit value
-uint16_t endian16(uint16_t value);
+uint16_t htons(uint16_t value);
 
 // Change endianess of a 32 bit value
-uint32_t endian32(uint32_t value);
+uint32_t htonl(uint32_t value);
