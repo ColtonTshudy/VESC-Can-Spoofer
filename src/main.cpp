@@ -4,6 +4,8 @@
 #include <SPI.h>
 #include <HAL\Timer.h>
 
+#define DEBUG true
+
 MCP_CAN CAN0(CS_PIN);
 
 MessageData data; // Data contained by the CAN message packets
@@ -13,12 +15,15 @@ SWTimer value_timer;
 
 void setup()
 {
-    // debugline
-    Serial.begin(115200);
+    if (DEBUG)
+        Serial.begin(115200);
 
-    if (CAN0.begin(MCP_STDEXT, CAN_1000KBPS, MCP_8MHZ) == CAN_OK)
-        Serial.println("MCP2515 Initialized Successfully!");
-    else
+    if (CAN0.begin(MCP_STDEXT, CAN_500KBPS, MCP_8MHZ) == CAN_OK)
+    {
+        if (DEBUG)
+            Serial.println("MCP2515 Initialized Successfully!");
+    }
+    else if (DEBUG)
         Serial.println("Error Initializing MCP2515...");
 
     CAN0.setMode(MCP_NORMAL); // Change to normal mode to allow messages to be transmitted
@@ -41,9 +46,15 @@ void loop()
     // Loop for sending message
     if (SWTimer_expired(&cycle_timer))
     {
-        constructPackets(&data, &packets);        
+        if (DEBUG)
+        {
+            Serial.println(htons(data.current_in) / (double)MP_CURRENT);
+            Serial.println(htons(data.voltage_in) / (double)MP_VOLTAGE);
+            Serial.println(" ");
+        }
+        constructPackets(&data, &packets);
         sendMessages(&packets);
-        SWTimer_start(&cycle_timer);    
+        SWTimer_start(&cycle_timer);
     }
 }
 
@@ -53,15 +64,27 @@ void sendMessages(Packets *pkts_p)
     byte msg_status[5];
     byte good_status[5] = {CAN_OK, CAN_OK, CAN_OK, CAN_OK, CAN_OK};
 
-    msg_status[0] = CAN0.sendMsgBuf(9, 1, DLC, pkts_p->p1);
+    msg_status[0] = CAN0.sendMsgBuf(ID_1, 1, DLC, pkts_p->p1);
     msg_status[1] = CAN0.sendMsgBuf(ID_2, 1, DLC, pkts_p->p2);
     msg_status[2] = CAN0.sendMsgBuf(ID_3, 1, DLC, pkts_p->p3);
     msg_status[3] = CAN0.sendMsgBuf(ID_4, 1, DLC, pkts_p->p4);
     msg_status[4] = CAN0.sendMsgBuf(ID_5, 1, DLC, pkts_p->p5);
 
     // debugline
-    if (memcmp(msg_status, good_status, 5) == 0)
-        Serial.println("CAN message failed to send");
+    if (DEBUG && false)
+    {
+        if (memcmp(msg_status, good_status, sizeof(good_status)))
+        {
+            for (uint16_t i = 0; i < sizeof(msg_status); i++)
+            {
+                String test = "";
+                test = test + i + ": ";
+                test = test + msg_status[i];
+                Serial.println(test);
+            }
+            Serial.println(" ");
+        }
+    }
 }
 
 // Construct CAN packets
@@ -92,23 +115,23 @@ void cycleValues(MessageData *data)
 {
     static uint32_t i = 0;
 
-    data->erpm = htonl((i * 100 % 40000) - 10000);
-    data->current_out = htons(i * MP_CURRENT % 300 - 150 * MP_CURRENT);
-    data->duty_cycle = htons(i * MP_DUTY / 100 % 2 - 1 * MP_DUTY);
+    data->erpm = htonl((i/5 * 100 % 40000) - 10000);
+    data->current_out = htons(i % (300 * MP_CURRENT) - 150 * MP_CURRENT);
+    data->duty_cycle = htons(i % (2 * MP_DUTY) - 1 * MP_DUTY);
 
-    data->ah_consum = htonl(i * MP_AH / 500 % 16);
-    data->ah_regen = htonl(i * MP_AH / 2000 % 16);
+    data->ah_consum = htonl(i / 50 % ((uint32_t)16 * MP_AH));
+    data->ah_regen = htonl(i / 200 % ((uint32_t)16 * MP_AH));
 
-    data->wh_consum = htonl(i * MP_AH/ 2 % 800);
-    data->wh_regen = htonl(i * MP_AH/ 50 % 800);
+    data->wh_consum = htonl(i / 2 % ((uint32_t)800 * MP_AH));
+    data->wh_regen = htonl(i / 50 % ((uint32_t)800 * MP_AH));
 
-    data->mosfet_temp = htons((i * MP_TEMP / 5 + 30 * MP_TEMP) % 80);
-    data->motor_temp = htons((i * MP_TEMP / 5 + 20 * MP_TEMP) % 80);
-    data->current_in = htons(i * MP_CURRENT % 80);
+    data->mosfet_temp = htons((i / 5 + 30) % (100 * MP_TEMP));
+    data->motor_temp = htons((i / 5 + 20) % (100 * MP_TEMP));
+    data->current_in = htons(i % (160 * MP_CURRENT) - 80 * MP_CURRENT);
     data->pid_position = htons(i % 50000);
 
     data->tachometer = htonl(i * 100 % 1000000);
-    data->voltage_in = htons(58 * MP_VOLTAGE - (i * MP_VOLTAGE / 20) % (58 * MP_VOLTAGE - 40 * MP_VOLTAGE));
+    data->voltage_in = htons(58 * MP_VOLTAGE - (i / 10) % ((58 - 40) * MP_VOLTAGE));
 
     i++;
 }

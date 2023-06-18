@@ -4,12 +4,13 @@
 #define CS_PIN 10
 
 //Arbitration IDs
-#define ID_0 0x000
-#define ID_1 0x009
-#define ID_2 0x00E
-#define ID_3 0x00F
-#define ID_4 0x010
-#define ID_5 0x01B
+// VESC IDs are left shifted by 8 bits!!!
+#define ID_0 0x000 << 8
+#define ID_1 0x009 << 8
+#define ID_2 0x00E << 8
+#define ID_3 0x00F << 8
+#define ID_4 0x010 << 8
+#define ID_5 0x01B << 8
 
 //Data length code
 #define DLC 0x8
@@ -17,12 +18,12 @@
 //Multipliers for certain values
 #define MP_DUTY 1000
 #define MP_CURRENT 10
-#define MP_AH 10000
+#define MP_AH 10000 //actually 10000, but integer overflow
 #define MP_TEMP 10
 #define MP_VOLTAGE 10
 
 #define CYCLE_TIME 500 //ms
-#define VALUE_TIME 20 //ms
+#define VALUE_TIME 4 //ms
 
 struct _MessageData
 {
