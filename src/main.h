@@ -3,6 +3,10 @@
 //CS Pin
 #define CS_PIN 10
 
+//Timing settings
+#define CYCLE_TIME 150 //ms. Affects how frequently CAN messages are sent
+#define VALUE_TIME 4 //ms. Affects how quickly value cycle
+
 //Arbitration IDs
 // VESC IDs are left shifted by 8 bits!!!
 #define ID_0 0x000 << 8
@@ -21,9 +25,6 @@
 #define MP_AH 10000 //actually 10000, but integer overflow
 #define MP_TEMP 10
 #define MP_VOLTAGE 10
-
-#define CYCLE_TIME 500 //ms
-#define VALUE_TIME 4 //ms
 
 struct _MessageData
 {
