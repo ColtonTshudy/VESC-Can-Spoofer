@@ -4,8 +4,8 @@
 #define CS_PIN 10
 
 //Timing settings
-#define CYCLE_TIME 150 //ms. Affects how frequently CAN messages are sent
-#define VALUE_TIME 4 //ms. Affects how quickly value cycle
+#define CYCLE_TIME 100 //ms. Affects how frequently CAN messages are sent
+#define VALUE_TIME 1 //ms. Affects how quickly value cycle
 
 //Arbitration IDs
 // VESC IDs are left shifted by 8 bits!!!
