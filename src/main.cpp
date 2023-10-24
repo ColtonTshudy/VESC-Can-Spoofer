@@ -4,7 +4,7 @@
 #include <SPI.h>
 #include <HAL\Timer.h>
 
-#define DEBUG true
+#define DEBUG false
 
 MCP_CAN CAN0(CS_PIN);
 
@@ -115,7 +115,7 @@ void cycleValues(MessageData *data)
 {
     static uint32_t i = 0;
 
-    data->erpm = htonl((i/5 * 100 % 60000) - 30000);
+    data->erpm = htonl((i / 5 * 100 % 60000) - 30000);
     data->current_out = htons(i % (300 * MP_CURRENT) - 150 * MP_CURRENT);
     data->duty_cycle = htons(i % (2 * MP_DUTY) - 1 * MP_DUTY);
 
