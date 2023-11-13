@@ -4,7 +4,7 @@
 #include <SPI.h>
 #include <HAL\Timer.h>
 
-#define DEBUG false
+#define DEBUG true
 
 MCP_CAN CAN0(CS_PIN);
 
